@@ -26,9 +26,9 @@
 #include "include/ipaddr.h"
 #include "common/debug.h"
 #include "common/Formatter.h"
+#include "common/ceph_regex.h"
 
 #include <algorithm>
-#include <regex>
 
 #include "include/ceph_assert.h"
 
@@ -397,25 +397,19 @@ mon_rwxa_t MonCapGrant::get_allowed(CephContext *cct,
       map<string,string>::const_iterator q = c_args.find(p->first);
       // argument must be present if a constraint exists
       if (q == c_args.end())
-	return 0;
+	      return 0;
       switch (p->second.match_type) {
       case StringConstraint::MATCH_TYPE_EQUAL:
-	if (p->second.value != q->second)
-	  return 0;
+        if (p->second.value != q->second)
+          return 0;
         break;
       case StringConstraint::MATCH_TYPE_PREFIX:
-	if (q->second.find(p->second.value) != 0)
-	  return 0;
+        if (q->second.find(p->second.value) != 0)
+          return 0;
         break;
       case StringConstraint::MATCH_TYPE_REGEX:
-        try {
-	  std::regex pattern(
-            p->second.value, std::regex::extended);
-          if (!std::regex_match(q->second, pattern))
-	    return 0;
-        } catch(const std::regex_error&) {
-	  return 0;
-	}
+        if (!ceph_regex_match(q->second, p->second.value, true))
+            return 0;
         break;
       default:
         break;

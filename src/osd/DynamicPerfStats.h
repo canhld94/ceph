@@ -4,6 +4,7 @@
 #ifndef DYNAMIC_PERF_STATS_H
 #define DYNAMIC_PERF_STATS_H
 
+#include "common/regex.h"
 #include "include/random.h"
 #include "messages/MOSDOp.h"
 #include "mgr/OSDPerfMetricTypes.h"
@@ -146,15 +147,12 @@ public:
             ceph_abort_msg("unknown counter type");
           }
 
-          std::smatch match;
-          if (!std::regex_search(match_string, match, d.regex)) {
+          std::vector<std::string> matches;
+          if (matches = ceph_regex_search(match_string, *d.regex); matches.empty()) {
             return false;
           }
-          if (match.size() <= 1) {
-            return false;
-          }
-          for (size_t i = 1; i < match.size(); i++) {
-            sub_key->push_back(match[i].str());
+          for (size_t i = 0; i < matches.size(); i++) {
+            sub_key->push_back(matches[i]);
           }
           return true;
         };

@@ -3,10 +3,10 @@
 
 headers: |
   #include <bit>
-  #include <regex>
   // rbd feature and io operation validation
   #include "include/stringify.h"
   #include "common/strtol.h"
+  #include "common/ceph_regex.h"
   #include "librbd/Features.h"
   #include "librbd/io/IoOperations.h"
 options:
@@ -19,8 +19,7 @@ options:
   - rbd
   validator: |
     [](std::string *value, std::string *error_message) {
-      std::regex pattern("^[^@/]+$");
-      if (!std::regex_match (*value, pattern)) {
+      if (!ceph_regex_match(*value, "^[^@/]+$")) {
         *value = "rbd";
         *error_message = "invalid RBD default pool, resetting to 'rbd'";
       }
@@ -34,8 +33,7 @@ options:
   - rbd
   validator: |
     [](std::string *value, std::string *error_message) {
-      std::regex pattern("^[^@/]*$");
-      if (!std::regex_match (*value, pattern)) {
+      if (!ceph_regex_match(*value, "^[^@/]*$")) {
         *value = "";
         *error_message = "ignoring invalid RBD data pool";
       }

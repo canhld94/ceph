@@ -24,6 +24,7 @@
 
 #include "mon/MonClient.h"
 #include "common/errno.h"
+#include "common/regex.h"
 #include "common/version.h"
 #include "mgr/Types.h"
 
@@ -32,6 +33,7 @@
 #include "Gil.h"
 
 #include <algorithm>
+#include <memory>
 
 #define dout_context g_ceph_context
 #define dout_subsys ceph_subsys_mgr
@@ -929,14 +931,14 @@ ceph_add_osd_perf_query(BaseMgrModule *self, PyObject *args)
               Py_RETURN_NONE;
             }
             d.regex_str = PyUnicode_AsUTF8(param_value);
-            try {
-              d.regex = d.regex_str.c_str();
-            } catch (const std::regex_error& e) {
+            d.regex = make_ceph_regex(d.regex_str.c_str())
+            if (!d.regex)
+            {
               derr << __func__ << " query " << query_param_name << " item " << j
                    << " contains invalid regex " << d.regex_str << dendl;
               Py_RETURN_NONE;
             }
-            if (d.regex.mark_count() == 0) {
+            if (get_mark_count(*d.regex)) {
               derr << __func__ << " query " << query_param_name << " item " << j
                    << " regex " << d.regex_str << ": no capturing groups"
                    << dendl;

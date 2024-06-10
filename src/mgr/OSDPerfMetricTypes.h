@@ -4,12 +4,13 @@
 #ifndef OSD_PERF_METRIC_H_
 #define OSD_PERF_METRIC_H_
 
+#include "common/ceph_json.h"
+#include "common/ceph_regex.h"
 #include "include/denc.h"
 #include "include/stringify.h"
 
 #include "mgr/Types.h"
 
-#include <regex>
 
 typedef std::vector<std::string> OSDPerfMetricSubKey; // array of regex match
 typedef std::vector<OSDPerfMetricSubKey> OSDPerfMetricKey;
@@ -28,7 +29,14 @@ enum class OSDPerfMetricSubKeyType : uint8_t {
 struct OSDPerfMetricSubKeyDescriptor {
   OSDPerfMetricSubKeyType type = static_cast<OSDPerfMetricSubKeyType>(-1);
   std::string regex_str;
-  std::regex regex;
+  std::unique_ptr<ceph_regex_t> regex;
+
+  OSDPerfMetricSubKeyDescriptor(const OSDPerfMetricSubKeyDescriptor& other)
+  {
+    type = other.type;
+    regex_str = other.regex_str;
+    regex = std::make_unique<ceph_regex_t>(regex_str.c_str());
+  }
 
   bool is_supported() const {
     switch (type) {
@@ -113,13 +121,8 @@ struct denc_traits<OSDPerfMetricKeyDescriptor> {
         v.clear();
         return;
       }
-      try {
-        d.regex = d.regex_str.c_str();
-      } catch (const std::regex_error& e) {
-        v.clear();
-        return;
-      }
-      if (d.regex.mark_count() == 0) {
+      d.regex = std::make_unique<ceph_regex_t>(d.regex_str.c_str());
+      if (!d.regex || get_mark_count(*d.regex) == 0) {
         v.clear();
         return;
       }

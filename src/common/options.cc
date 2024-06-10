@@ -11,7 +11,7 @@
 #include "include/common_fwd.h"
 #include <boost/algorithm/string.hpp>
 #include <boost/lexical_cast.hpp>
-#include <regex>
+
 
 // Definitions for enums
 #include "common/perf_counters.h"

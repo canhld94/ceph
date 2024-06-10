@@ -4,9 +4,9 @@
 #ifndef CEPH_MGR_MDS_PERF_METRIC_TYPES_H
 #define CEPH_MGR_MDS_PERF_METRIC_TYPES_H
 
-#include <regex>
 #include <vector>
 #include <iostream>
+#include "common/ceph_regex.h"
 
 #include "include/denc.h"
 #include "include/stringify.h"
@@ -25,7 +25,7 @@ enum class MDSPerfMetricSubKeyType : uint8_t {
 struct MDSPerfMetricSubKeyDescriptor {
   MDSPerfMetricSubKeyType type = static_cast<MDSPerfMetricSubKeyType>(-1);
   std::string regex_str;
-  std::regex regex;
+  std::unique_ptr<ceph_regex_t> regex;
 
   bool is_supported() const {
     switch (type) {
@@ -39,8 +39,14 @@ struct MDSPerfMetricSubKeyDescriptor {
 
   MDSPerfMetricSubKeyDescriptor() {
   }
+
   MDSPerfMetricSubKeyDescriptor(MDSPerfMetricSubKeyType type, const std::string &regex_str)
     : type(type), regex_str(regex_str) {
+  }
+
+  MDSPerfMetricSubKeyDescriptor(const MDSPerfMetricSubKeyDescriptor &other)
+    : type(other.type), regex_str(other.regex_str) {
+      regex = std::make_unique<ceph_regex_t>(regex_str.c_str());
   }
 
   bool operator<(const MDSPerfMetricSubKeyDescriptor &other) const {
@@ -100,13 +106,8 @@ struct denc_traits<MDSPerfMetricKeyDescriptor> {
         v.clear();
         return;
       }
-      try {
-        d.regex = d.regex_str.c_str();
-      } catch (const std::regex_error& e) {
-        v.clear();
-        return;
-      }
-      if (d.regex.mark_count() == 0) {
+      d.regex = make_ceph_regex(d.regex_str.c_str());
+      if (!d.regex || get_mark_count(*d.regex) == 0) {
         v.clear();
         return;
       }

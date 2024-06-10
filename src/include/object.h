@@ -30,6 +30,17 @@
 #include "encoding.h"
 #include "ceph_hash.h"
 
+#ifdef LIBCXX_NO_STRING_SPACESHIP
+namespace std {
+  constexpr auto operator<=>(const string &lhs, const string &rhs) noexcept {
+    return lhs.compare(rhs) <=> 0;
+  }
+  constexpr auto operator<=>(const string_view &lhs, const string_view &rhs) noexcept {
+    return lhs.compare(rhs) <=> 0;
+  }
+}
+#endif
+
 struct object_t {
   std::string name;
 
