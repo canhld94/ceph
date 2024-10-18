@@ -203,6 +203,7 @@ inline namespace v14_2_0 {
     int set_safe_callback(void *cb_arg, callback_t cb)
       __attribute__ ((deprecated));
     int wait_for_complete();
+    int wait_for_complete(size_t timeout_ms);
     int wait_for_safe() __attribute__ ((deprecated));
     int wait_for_complete_and_cb();
     int wait_for_safe_and_cb() __attribute__ ((deprecated));

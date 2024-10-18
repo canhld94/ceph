@@ -1039,6 +1039,12 @@ int librados::AioCompletion::AioCompletion::wait_for_complete()
   return c->wait_for_complete();
 }
 
+int librados::AioCompletion::AioCompletion::wait_for_complete(size_t timeout_ms)
+{
+  AioCompletionImpl *c = (AioCompletionImpl *)pc;
+  return c->wait_for_complete(timeout_ms);
+}
+
 int librados::AioCompletion::AioCompletion::wait_for_safe()
 {
   AioCompletionImpl *c = (AioCompletionImpl *)pc;
@@ -2067,6 +2073,13 @@ int librados::IoCtx::aio_stat(const std::string& oid, librados::AioCompletion *c
 {
   object_t obj(oid);
   return io_ctx_impl->aio_stat(obj, c->pc, psize, pmtime);
+}
+
+int librados::IoCtx::aio_stat2(const std::string& oid, librados::AioCompletion *c,
+			      uint64_t *psize, struct timespec *pts)
+{
+  object_t obj(oid);
+  return io_ctx_impl->aio_stat2(obj, c->pc, psize, pts);
 }
 
 int librados::IoCtx::aio_cancel(librados::AioCompletion *c)
