@@ -66,7 +66,7 @@ struct librados::AioCompletionImpl {
   int wait_for_complete(size_t timeout_ms) {
     std::unique_lock l{lock};
     cond.wait_for(l, std::chrono::milliseconds(timeout_ms), [this] { return complete; });
-    return 0;
+    return complete ? 0 : -ETIMEDOUT;
   }
   int wait_for_safe() {
     return wait_for_complete();
