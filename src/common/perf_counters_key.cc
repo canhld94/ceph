@@ -166,12 +166,12 @@ std::string key_create(std::string_view counter_name)
 
 std::string_view key_name(std::string_view key)
 {
-  return detail::name(key.begin(), key.end());
+  return detail::name(key.begin().base(), key.end().base());
 }
 
 label_range key_labels(std::string_view key)
 {
-  return detail::labels(key.begin(), key.end());
+  return detail::labels(key.begin().base(), key.end().base());
 }
 
 

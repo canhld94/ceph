@@ -56,6 +56,8 @@ class label_iterator {
 
   label_iterator() = default;
   label_iterator(base_iterator begin, base_iterator end);
+  label_iterator(std::__wrap_iter<base_iterator> begin, std::__wrap_iter<base_iterator> end)
+  : label_iterator(begin.base(), end.base()) {}
 
   label_iterator& operator++();
   label_iterator operator++(int);
