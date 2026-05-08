@@ -10,7 +10,7 @@
 #include "mgr/OSDPerfMetricTypes.h"
 #include "mgr/MDSPerfMetricTypes.h"
 
-enum class MetricReportType {
+enum class MetricReportType : int {
   METRIC_REPORT_TYPE_OSD = 0,
   METRIC_REPORT_TYPE_MDS = 1,
 };
